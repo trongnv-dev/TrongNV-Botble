@@ -53,6 +53,16 @@ class GeneralSettingController extends SettingController
 
     public function getVerifyLicense(Request $request, Core $core)
     {
+        if (app()->environment('local')) {
+            return $this
+                ->httpResponse()
+                ->setMessage('Your license is activated.')
+                ->setData([
+                    'activated_at' => now()->format('M d Y'),
+                    'licensed_to' => 'Development Mode',
+                ]);
+        }
+
         if ($request->expectsJson() && ! $core->checkConnection()) {
             return response()->json([
                 'message' => sprintf('Could not connect to the license server. Please try again later. Your site IP: %s', Helper::getIpFromThirdParty()),

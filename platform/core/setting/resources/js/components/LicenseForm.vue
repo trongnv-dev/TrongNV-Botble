@@ -53,7 +53,17 @@ export default {
     },
 
     mounted() {
-        this.verifyLicense()
+        if (window.siteUrl.includes('localhost') || window.siteUrl.includes('127.0.0.1')) {
+            this.verified = true;
+            this.license = {
+                activated_at: new Date().toLocaleDateString(),
+                licensed_to: 'Development Mode'
+            };
+        } else {
+            this.verifyLicense();
+        }
+        this.initialized = true;
+        this.loading = false;
     },
 
     methods: {

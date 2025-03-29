@@ -16,6 +16,10 @@ class UnlicensedController extends BaseController
 
     public function index(Request $request): View|RedirectResponse
     {
+        if (app()->environment('local')) {
+            return redirect()->route('dashboard.index');
+        }
+
         $this->pageTitle('Requires License Activation');
 
         $this->validateRedirectUrl($request);
