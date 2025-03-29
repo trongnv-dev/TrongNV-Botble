@@ -15,6 +15,10 @@ class EnsureLicenseHasBeenActivated
 
     public function handle(Request $request, Closure $next)
     {
+        if (app()->environment('local')) {
+            return $next($request);
+        }
+
         if (
             ! is_in_admin(true)
             || Auth::guest()

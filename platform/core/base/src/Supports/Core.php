@@ -223,8 +223,10 @@ final class Core
 
     public function verifyLicense(bool $timeBasedCheck = false, int $timeoutInSeconds = 300): bool
     {
-        return true;
-        
+        if (app()->environment('local')) {
+            return true;
+        }
+
         LicenseVerifying::dispatch();
 
         if (! $this->isLicenseFileExists()) {
