@@ -23,6 +23,7 @@ use Botble\CustomField\Repositories\Interfaces\FieldItemInterface;
 use Botble\CustomField\Support\CustomFieldSupport;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Page\Models\Page;
+use Botble\Page\Supports\Template;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 
@@ -52,7 +53,8 @@ class CustomFieldServiceProvider extends ServiceProvider
         $this
             ->setNamespace('plugins/custom-field')
             ->loadHelpers()
-            ->loadAndPublishConfigurations(['permissions', 'general'])
+            ->loadAndPublishConfigurations(['general'])
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadAndPublishTranslations()
             ->loadRoutes()
             ->loadAndPublishViews()
@@ -135,9 +137,7 @@ class CustomFieldServiceProvider extends ServiceProvider
             'basic',
             trans('plugins/custom-field::rules.page_template'),
             'page_template',
-            function () {
-                return get_page_templates();
-            }
+            fn () => Template::getPageTemplates()
         )
             ->registerRule('basic', trans('plugins/custom-field::rules.page'), Page::class, function () {
                 return Page::query()
@@ -178,12 +178,9 @@ class CustomFieldServiceProvider extends ServiceProvider
                 trans('plugins/custom-field::rules.post_format'),
                 Post::class . '_post_format',
                 function () {
-                    $formats = [];
-                    foreach (get_post_formats() as $key => $format) {
-                        $formats[$key] = $format['name'];
-                    }
-
-                    return $formats;
+                    return array_map(function ($format) {
+                        return $format['name'];
+                    }, get_post_formats());
                 }
             )
             ->expandRule('other', trans('plugins/custom-field::rules.model_name'), 'model_name', function () {

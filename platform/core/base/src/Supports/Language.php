@@ -270,6 +270,7 @@ class Language
      */
     protected static array $languages = [
         'af' => ['af', 'af', 'Afrikaans', 'ltr', 'za'],
+        'am' => ['am', 'am', 'አማርኛ', 'ltr', 'et'],
         'ar' => ['ar', 'ar', 'العربية', 'rtl', 'ar'],
         'ary' => ['ar', 'ary', 'العربية المغربية', 'rtl', 'ma'],
         'az' => ['az', 'az', 'Azərbaycan', 'ltr', 'az'],
@@ -289,6 +290,7 @@ class Language
         'de_DE' => ['de', 'de_DE', 'Deutsch', 'ltr', 'de'],
         'de_DE_formal' => ['de', 'de_DE_formal', 'Deutsch', 'ltr', 'de'],
         'el' => ['el', 'el', 'Ελληνικά', 'ltr', 'gr'],
+        'en' => ['en', 'en', 'English', 'ltr', 'us'],
         'en_US' => ['en', 'en_US', 'English', 'ltr', 'us'],
         'en_AU' => ['en', 'en_AU', 'English', 'ltr', 'au'],
         'en_CA' => ['en', 'en_CA', 'English', 'ltr', 'ca'],
@@ -309,6 +311,7 @@ class Language
         'fa_IR' => ['fa', 'fa_IR', 'فارسی', 'rtl', 'ir'],
         'fi' => ['fi', 'fi', 'Suomi', 'ltr', 'fi'],
         'fo' => ['fo', 'fo', 'Føroyskt', 'ltr', 'fo'],
+        'fr' => ['fr', 'fr', 'Français', 'ltr', 'fr'],
         'fr_BE' => ['fr', 'fr_BE', 'Français', 'ltr', 'be'],
         'fr_FR' => ['fr', 'fr_FR', 'Français', 'ltr', 'fr'],
         'fy' => ['fy', 'fy', 'Frysk', 'ltr', 'nl'],
@@ -322,6 +325,7 @@ class Language
         'ht' => ['ht', 'ht', 'Kreyòl Ayisyen', 'ltr', 'ht'],
         'hu_HU' => ['hu', 'hu_HU', 'Magyar', 'ltr', 'hu'],
         'hy' => ['hy', 'hy', 'Հայերեն', 'ltr', 'am'],
+        'id' => ['id', 'id', 'Bahasa Indonesia', 'ltr', 'id'],
         'id_ID' => ['id', 'id_ID', 'Bahasa Indonesia', 'ltr', 'id'],
         'is_IS' => ['is', 'is_IS', 'Íslenska', 'ltr', 'is'],
         'it_IT' => ['it', 'it_IT', 'Italiano', 'ltr', 'it'],
@@ -358,6 +362,7 @@ class Language
         'sl_SI' => ['sl', 'sl_SI', 'Slovenščina', 'ltr', 'si'],
         'so_SO' => ['so', 'so_SO', 'Af-Soomaali', 'ltr', 'so'],
         'sq' => ['sq', 'sq', 'Shqip', 'ltr', 'al'],
+        'sq_AL' => ['sq', 'sq_AL', 'Shqip (Shqipëri)', 'ltr', 'al'],
         'sr_RS' => ['sr', 'sr_RS', 'Српски језик', 'ltr', 'rs'],
         'su_ID' => ['su', 'su_ID', 'Basa Sunda', 'ltr', 'id'],
         'sv_SE' => ['sv', 'sv_SE', 'Svenska', 'ltr', 'se'],
@@ -365,7 +370,9 @@ class Language
         'sw' => ['sw', 'sw', 'Swahili', 'ltr', 'tz'],
         'ta_LK' => ['ta', 'ta_LK', 'தமிழ்', 'ltr', 'lk'],
         'th' => ['th', 'th', 'ไทย', 'ltr', 'th'],
+        'ti' => ['ti', 'ti', 'ትግርኛ', 'ltr', 'er'],
         'tl' => ['tl', 'tl', 'Tagalog', 'ltr', 'ph'],
+        'tr' => ['tr', 'tr', 'Türkçe', 'ltr', 'tr'],
         'tr_TR' => ['tr', 'tr_TR', 'Türkçe', 'ltr', 'tr'],
         'ug_CN' => ['ug', 'ug_CN', 'Uyƣurqə', 'ltr', 'cn'],
         'uk' => ['uk', 'uk', 'Українська', 'ltr', 'ua'],
@@ -383,7 +390,7 @@ class Language
         return self::$flags;
     }
 
-    public static function getAvailableLocales(): array
+    public static function getAvailableLocales(bool $original = false): array
     {
         $languages = [];
         $locales = BaseHelper::scanFolder(lang_path());
@@ -429,9 +436,13 @@ class Language
                     'code' => $locale,
                     'name' => $locale,
                     'flag' => $locale,
-                    'is_rtl' => $language[3] === 'rtl',
+                    'is_rtl' => Arr::get($languages, "$locale.3") === 'rtl',
                 ];
             }
+        }
+
+        if ($original) {
+            return $languages;
         }
 
         return apply_filters('core_available_locales', $languages);

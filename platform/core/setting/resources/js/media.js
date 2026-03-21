@@ -27,6 +27,7 @@ $(() => {
         const $form = currentTarget.closest('form')
 
         const totalFiles = $modal.data('total-files')
+        const overrideExisting = $modal.find('input[name="override_existing"]').is(':checked') ? 1 : 0
         let message = null
 
         Botble.showButtonLoading(currentTarget)
@@ -43,7 +44,7 @@ $(() => {
 
             $httpClient
                 .make()
-                .post($form.prop('action'), { total: totalFiles, offset, limit })
+                .post($form.prop('action'), { total: totalFiles, offset, limit, override_existing: overrideExisting })
                 .then(({ data }) => {
                     message = data.message
 
@@ -56,7 +57,7 @@ $(() => {
                         Botble.hideButtonLoading(currentTarget)
                         $modal.modal('hide')
                     }
-                });
+                })
         }
 
         sendRequest()

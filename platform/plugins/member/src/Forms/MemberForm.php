@@ -13,6 +13,7 @@ use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\DatePickerField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\OnOffField;
+use Botble\Base\Forms\Fields\PasswordField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
@@ -83,9 +84,10 @@ class MemberForm extends FormAbstract
             )
             ->add(
                 'password',
-                'password',
+                PasswordField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/member::member.form.password'))
+                    ->placeholder(trans('plugins/member::member.form.password'))
                     ->collapsible('is_change_password', 1, ! $this->getModel()->exists || $this->getModel()->is_change_password)
                     ->required()
                     ->maxLength(60)
@@ -93,9 +95,10 @@ class MemberForm extends FormAbstract
             )
             ->add(
                 'password_confirmation',
-                'password',
+                PasswordField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/member::member.form.password_confirmation'))
+                    ->placeholder(trans('plugins/member::member.form.password_confirmation'))
                     ->collapsible('is_change_password', 1, ! $this->getModel()->exists || $this->getModel()->is_change_password)
                     ->required()
                     ->maxLength(60)

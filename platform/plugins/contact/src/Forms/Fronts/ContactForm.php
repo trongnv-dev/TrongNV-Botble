@@ -2,12 +2,11 @@
 
 namespace Botble\Contact\Forms\Fronts;
 
-use Botble\Base\Facades\Html;
 use Botble\Base\Forms\FieldOptions\ButtonFieldOption;
 use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
 use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
-use Botble\Base\Forms\FieldOptions\InputFieldOption;
 use Botble\Base\Forms\FieldOptions\NumberFieldOption;
+use Botble\Base\Forms\FieldOptions\PhoneNumberFieldOption;
 use Botble\Base\Forms\FieldOptions\RadioFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
@@ -18,6 +17,7 @@ use Botble\Base\Forms\Fields\EmailField;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
+use Botble\Base\Forms\Fields\PhoneNumberField;
 use Botble\Base\Forms\Fields\RadioField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
@@ -106,7 +106,7 @@ class ContactForm extends FormFront
             ->addRowWrapper('form_wrapper', function (self $form) use ($displayFields, $mandatoryFields): void {
                 $customFields = CustomField::query()
                     ->wherePublished()
-                    ->orderBy('order')
+                    ->oldest('order')
                     ->get();
 
                 $form
@@ -117,8 +117,8 @@ class ContactForm extends FormFront
                                 TextField::class,
                                 TextFieldOption::make()
                                     ->required()
-                                    ->label(__('Name'))
-                                    ->placeholder(__('Your Name'))
+                                    ->label(trans('plugins/contact::contact.form_name'))
+                                    ->placeholder(trans('plugins/contact::contact.your_name'))
                                     ->wrapperAttributes(['class' => $this->formInputWrapperClass])
                                     ->cssClass($this->formInputClass)
                                     ->maxLength(-1)
@@ -135,8 +135,8 @@ class ContactForm extends FormFront
                                             ->when(in_array('email', $mandatoryFields), function (TextFieldOption $option): void {
                                                 $option->required();
                                             })
-                                            ->label(__('Email'))
-                                            ->placeholder(__('Your Email'))
+                                            ->label(trans('plugins/contact::contact.form_email'))
+                                            ->placeholder(trans('plugins/contact::contact.your_email'))
                                             ->wrapperAttributes(['class' => $this->formInputWrapperClass])
                                             ->cssClass($this->formInputClass)
                                             ->maxLength(-1)
@@ -153,8 +153,8 @@ class ContactForm extends FormFront
                                         ->when(in_array('address', $mandatoryFields), function (TextFieldOption $option): void {
                                             $option->required();
                                         })
-                                        ->label(__('Address'))
-                                        ->placeholder(__('Your Address'))
+                                        ->label(trans('plugins/contact::contact.address'))
+                                        ->placeholder(trans('plugins/contact::contact.your_address'))
                                         ->wrapperAttributes(['class' => $this->formInputWrapperClass])
                                         ->cssClass($this->formInputClass)
                                         ->maxLength(-1)
@@ -166,16 +166,16 @@ class ContactForm extends FormFront
                             $form
                                 ->add(
                                     'phone',
-                                    TextField::class,
-                                    TextFieldOption::make()
-                                        ->when(in_array('phone', $mandatoryFields), function (TextFieldOption $option): void {
+                                    PhoneNumberField::class,
+                                    PhoneNumberFieldOption::make()
+                                        ->when(in_array('phone', $mandatoryFields), function (PhoneNumberFieldOption $option): void {
                                             $option->required();
                                         })
-                                        ->label(__('Phone'))
-                                        ->placeholder(__('Your Phone'))
+                                        ->label(trans('plugins/contact::contact.phone'))
+                                        ->placeholder(trans('plugins/contact::contact.your_phone'))
                                         ->wrapperAttributes(['class' => $this->formInputWrapperClass])
+                                        ->withCountryCodeSelection()
                                         ->cssClass($this->formInputClass)
-                                        ->maxLength(-1)
                                 );
                         });
                     })
@@ -188,8 +188,8 @@ class ContactForm extends FormFront
                                     ->when(in_array('subject', $mandatoryFields), function (TextFieldOption $option): void {
                                         $option->required();
                                     })
-                                    ->label(__('Subject'))
-                                    ->placeholder(__('Subject'))
+                                    ->label(trans('plugins/contact::contact.form_subject'))
+                                    ->placeholder(trans('plugins/contact::contact.subject_placeholder'))
                                     ->wrapperAttributes(['class' => $this->formInputWrapperClass])
                                     ->cssClass($this->formInputClass)
                                     ->maxLength(-1)
@@ -198,15 +198,17 @@ class ContactForm extends FormFront
                     })
                     ->when($customFields, function (ContactForm $form, Collection $customFields): void {
                         foreach ($customFields as $customField) {
+                            /**
+                             * @var CustomField $customField
+                             */
                             $options = $customField->options()->select('id', 'label', 'value')->get()->mapWithKeys(function ($option) {
                                 return [$option->value => $option->label];
                             })->all();
 
                             $fieldOptions = match ($customField->type->getValue()) {
                                 CustomFieldType::NUMBER => NumberFieldOption::make()
-                                    ->when($customField->placeholder, function (InputFieldOption $options, string $placeholder): void {
-                                        $options->placeholder($placeholder);
-                                    }),
+                                    ->placeholder($customField->placeholder ?: $customField->name)
+                                    ->cssClass($this->formInputClass),
                                 CustomFieldType::DROPDOWN => SelectFieldOption::make()
                                     ->when($customField->placeholder, function (SelectFieldOption $fieldOptions, string $placeholder) use ($options): void {
                                         $fieldOptions->choices(['' => $placeholder, ...$options]);
@@ -240,57 +242,48 @@ class ContactForm extends FormFront
                                     $fieldOptions
                                         ->label($customField->name)
                                         ->required($customField->required)
+                                        ->when($customField->required, function ($options): void {
+                                            $options->addAttribute('required', 'required');
+                                        })
                                         ->wrapperAttributes(['class' => $this->formInputWrapperClass])
                                 );
                             }, 12);
                         }
                     });
             })
-            ->addRowWrapper(
+            ->add(
                 'content',
-                function (self $form): void {
-                    $form->addColumnWrapper(
-                        'content',
-                        function (self $form): void {
-                            $form->add(
-                                'content',
-                                TextareaField::class,
-                                TextareaFieldOption::make()
-                                    ->required()
-                                    ->label(__('Content'))
-                                    ->placeholder(__('Write your message here'))
-                                    ->wrapperAttributes(['class' => $this->formInputWrapperClass])
-                                    ->cssClass($this->formInputClass)
-                                    ->rows(5)
-                                    ->maxLength(-1)
-                            );
-                        },
-                        12
-                    );
-                }
+                TextareaField::class,
+                TextareaFieldOption::make()
+                    ->required()
+                    ->label(trans('plugins/contact::contact.message'))
+                    ->placeholder(trans('plugins/contact::contact.your_message'))
+                    ->wrapperAttributes(['class' => $this->formInputWrapperClass])
+                    ->cssClass($this->formInputClass)
+                    ->maxLength(-1)
             )
+            ->when(setting('contact_form_show_terms_checkbox', true), function (self $form): void {
+                $form->add(
+                    'agree_terms_and_policy',
+                    OnOffCheckboxField::class,
+                    CheckboxFieldOption::make()
+                        ->required()
+                        ->label(trans('plugins/contact::contact.agree_terms_privacy'))
+                        ->wrapperAttributes(['class' => $this->formInputWrapperClass])
+                );
+            })
             ->add(
                 'filters_after_form',
                 HtmlField::class,
                 HtmlFieldOption::make()
                     ->content(apply_filters('after_contact_form', null))
             )
-            ->add(
-                'agree_terms_and_policy',
-                OnOffCheckboxField::class,
-                CheckboxFieldOption::make()
-                    ->label(
-                        ($privacyPolicyUrl = Theme::termAndPrivacyPolicyUrl())
-                            ? __('I agree to the :link', ['link' => Html::link($privacyPolicyUrl, __('Terms and Privacy Policy'), attributes: ['class' => 'text-decoration-underline', 'target' => '_blank'])])
-                            : __('I agree to the Terms and Privacy Policy')
-                    )
-            )
             ->addWrappedField(
                 'submit',
                 'submit',
                 ButtonFieldOption::make()
                     ->cssClass('contact-button')
-                    ->label(__('Send'))
+                    ->label(trans('plugins/contact::contact.send'))
             )
             ->addWrappedField(
                 'messages',

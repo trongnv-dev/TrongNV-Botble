@@ -2,6 +2,7 @@
 
 namespace FriendsOfBotble\Comment\Forms\Fronts;
 
+use Botble\Base\Forms\FieldOptions\ButtonFieldOption;
 use Botble\Base\Forms\FieldOptions\EmailFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
@@ -47,6 +48,7 @@ class CommentForm extends FormFront
                 TextareaField::class,
                 TextareaFieldOption::make()
                     ->label(trans('plugins/fob-comment::comment.common.comment'))
+                    ->placeholder(trans('plugins/fob-comment::comment.common.comment_placeholder'))
                     ->required()
                     ->colspan(2)
                     ->toArray()
@@ -56,6 +58,7 @@ class CommentForm extends FormFront
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/fob-comment::comment.common.name'))
+                    ->placeholder(trans('plugins/fob-comment::comment.common.name_placeholder'))
                     ->when(
                         Arr::get($preparedData, 'name'),
                         fn (TextFieldOption $option, $value) => $option->defaultValue($value)->disabled(),
@@ -71,22 +74,26 @@ class CommentForm extends FormFront
                     ->when(
                         Arr::get($preparedData, 'email'),
                         fn (EmailFieldOption $option, $value) => $option->defaultValue($value)->disabled(),
-                        fn (EmailFieldOption $option) => $option->required()
+                        fn (EmailFieldOption $option) => CommentHelper::isEmailOptional() ? $option : $option->required()
                     )
+                    ->placeholder(trans('plugins/fob-comment::comment.common.email_placeholder'))
                     ->colspan(1)
                     ->toArray()
             )
-            ->add(
-                'website',
-                TextField::class,
-                TextFieldOption::make()->label(trans('plugins/fob-comment::comment.common.website'))
-                    ->colspan(2)
-                    ->when(
-                        Arr::get($preparedData, 'website'),
-                        fn (TextFieldOption $option, $value) => $option->defaultValue($value)->disabled()
-                    )
-                    ->toArray()
-            )
+            ->when(CommentHelper::isShowWebsiteField(), function (FormAbstract $form) use ($preparedData): void {
+                $form->add(
+                    'website',
+                    TextField::class,
+                    TextFieldOption::make()->label(trans('plugins/fob-comment::comment.common.website'))
+                        ->colspan(2)
+                        ->when(
+                            Arr::get($preparedData, 'website'),
+                            fn (TextFieldOption $option, $value) => $option->defaultValue($value)->disabled()
+                        )
+                        ->placeholder(trans('plugins/fob-comment::comment.common.website_placeholder'))
+                        ->toArray()
+                );
+            })
             ->when(
                 CommentHelper::isEnableReCaptcha(),
                 fn (FormAbstract $form) => $form->add('recaptcha', ReCaptchaField::class)
@@ -101,14 +108,16 @@ class CommentForm extends FormFront
                         ->toArray()
                 );
             })
-            ->setFormEndKey('button')
-            ->add('button', 'submit', [
-                'label' => trans('plugins/fob-comment::comment.front.form.submit'),
-                'attr' => [
-                    'class' => 'btn btn-primary mb-4',
-                ],
-                'colspan' => 2,
-            ]);
+            ->setFormEndKey('submit')
+            ->add(
+                'submit',
+                'submit',
+                ButtonFieldOption::make()
+                    ->label(trans('plugins/fob-comment::comment.front.form.submit'))
+                    ->cssClass('btn btn-primary mb-4')
+                    ->colspan(2)
+                    ->toArray()
+            );
     }
 
     public static function createWithReference(BaseModel $model): FormAbstract

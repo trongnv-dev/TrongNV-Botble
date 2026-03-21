@@ -5,7 +5,6 @@ namespace Botble\CookieConsent\Providers;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Theme\Events\RenderingThemeOptionSettings;
-use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Routing\Events\RouteMatched;
@@ -21,8 +20,7 @@ class CookieConsentServiceProvider extends ServiceProvider
             ->setNamespace('plugins/cookie-consent')
             ->loadAndPublishConfigurations(['general'])
             ->loadAndPublishTranslations()
-            ->loadAndPublishViews()
-            ->publishAssets();
+            ->loadAndPublishViews();
 
         $this->app['events']->listen(RouteMatched::class, function (): void {
             if (defined('THEME_FRONT_FOOTER') && theme_option('cookie_consent_enable', 'yes') == 'yes') {
@@ -35,28 +33,6 @@ class CookieConsentServiceProvider extends ServiceProvider
 
                     $view->with(compact('cookieConsentConfig'));
                 });
-
-                if (! Cookie::has(config('plugins.cookie-consent.general.cookie_name'))) {
-                    Theme::asset()
-                        ->usePath(false)
-                        ->add(
-                            'cookie-consent-css',
-                            asset('vendor/core/plugins/cookie-consent/css/cookie-consent.css'),
-                            [],
-                            [],
-                            '1.0.2'
-                        );
-                    Theme::asset()
-                        ->container('footer')
-                        ->usePath(false)
-                        ->add(
-                            'cookie-consent-js',
-                            asset('vendor/core/plugins/cookie-consent/js/cookie-consent.js'),
-                            ['jquery'],
-                            [],
-                            '1.0.2'
-                        );
-                }
 
                 add_filter(THEME_FRONT_FOOTER, [$this, 'registerCookieConsent'], 1346);
             }
@@ -75,6 +51,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                             'id' => 'cookie_consent_enable',
                             'type' => 'customSelect',
                             'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.enable'),
+                            'shared' => true,
                             'attributes' => [
                                 'name' => 'cookie_consent_enable',
                                 'list' => [
@@ -91,6 +68,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                             'id' => 'cookie_consent_style',
                             'type' => 'customSelect',
                             'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.style'),
+                            'shared' => true,
                             'attributes' => [
                                 'name' => 'cookie_consent_style',
                                 'list' => [
@@ -167,6 +145,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                             'id' => 'cookie_consent_background_color',
                             'type' => 'customColor',
                             'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.background_color'),
+                            'shared' => true,
                             'attributes' => [
                                 'name' => 'cookie_consent_background_color',
                                 'value' => '#000',
@@ -181,6 +160,7 @@ class CookieConsentServiceProvider extends ServiceProvider
                             'id' => 'cookie_consent_text_color',
                             'type' => 'customColor',
                             'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.text_color'),
+                            'shared' => true,
                             'attributes' => [
                                 'name' => 'cookie_consent_text_color',
                                 'value' => '#fff',
@@ -201,6 +181,40 @@ class CookieConsentServiceProvider extends ServiceProvider
                                 'options' => [
                                     'class' => 'form-control',
                                     'placeholder' => trans('plugins/cookie-consent::cookie-consent.theme_options.max_width'),
+                                ],
+                            ],
+                        ],
+                        [
+                            'id' => 'cookie_consent_show_reject_button',
+                            'type' => 'customSelect',
+                            'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.show_reject_button'),
+                            'helper' => trans('plugins/cookie-consent::cookie-consent.theme_options.show_reject_button_helper'),
+                            'attributes' => [
+                                'name' => 'cookie_consent_show_reject_button',
+                                'list' => [
+                                    'no' => trans('core/base::base.no'),
+                                    'yes' => trans('core/base::base.yes'),
+                                ],
+                                'value' => 'no',
+                                'options' => [
+                                    'class' => 'form-control',
+                                ],
+                            ],
+                        ],
+                        [
+                            'id' => 'cookie_consent_show_customize_button',
+                            'type' => 'customSelect',
+                            'label' => trans('plugins/cookie-consent::cookie-consent.theme_options.show_customize_button'),
+                            'helper' => trans('plugins/cookie-consent::cookie-consent.theme_options.show_customize_button_helper'),
+                            'attributes' => [
+                                'name' => 'cookie_consent_show_customize_button',
+                                'list' => [
+                                    'no' => trans('core/base::base.no'),
+                                    'yes' => trans('core/base::base.yes'),
+                                ],
+                                'value' => 'no',
+                                'options' => [
+                                    'class' => 'form-control',
                                 ],
                             ],
                         ],

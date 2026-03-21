@@ -101,7 +101,7 @@ class Typography
     public function renderCssVariables(): string
     {
         if (empty($this->fontFamilies)) {
-            $fontFamily = new TypographyItem('primary', __('Primary'), theme_option('primary_font', 'Inter'));
+            $fontFamily = new TypographyItem('primary', trans('packages/theme::theme.typography_primary'), theme_option('primary_font', 'Inter'));
 
             $this->fontFamilies[$fontFamily->getName()] = $fontFamily;
         }
@@ -153,6 +153,8 @@ class Typography
             );
         }
 
+        $styles .= '}';
+
         if ($fontSizes) {
             foreach (['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'body'] as $tag) {
                 if (! isset($fontSizes[$tag])) {
@@ -169,7 +171,7 @@ class Typography
             }
         }
 
-        $styles .= '}</style>';
+        $styles .= '</style>';
 
         return $fontFaces . $styles;
     }
@@ -186,16 +188,16 @@ class Typography
             foreach ($this->fontFamilies as $fontFamily) {
                 $fields[] = GoogleFontsField::make()
                     ->name("tp_{$fontFamily->getName()}_font")
-                    ->label(__(':name font family', ['name' => $fontFamily->getLabel()]))
+                    ->label(trans('packages/theme::theme.typography_font_family', ['name' => $fontFamily->getLabel()]))
                     ->defaultValue($fontFamily->getDefault());
             }
 
             foreach ($this->fontSizes as $fontSize) {
                 $fields[] = NumberField::make()
                     ->name("tp_{$fontSize->getName()}_size")
-                    ->label(__(':name font size', ['name' => $fontSize->getLabel()]))
+                    ->label(trans('packages/theme::theme.typography_font_size', ['name' => $fontSize->getLabel()]))
                     ->defaultValue($fontSize->getDefault())
-                    ->helperText(__('The font size in pixels (px). Default is :default', [
+                    ->helperText(trans('packages/theme::theme.typography_font_size_helper', [
                         'default' => "<code>{$fontSize->getDefault()}</code>",
                     ]));
             }

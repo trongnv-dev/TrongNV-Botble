@@ -1,8 +1,8 @@
 #rv_media_body {
     display: flex;
     flex-direction: column;
-    max-height: calc(100vh - 8rem);
-    min-height: 500px;
+    max-height: calc(100vh - 6rem);
+    min-height: 550px;
 }
 
 .navbar .dropdown-menu-right {
@@ -48,12 +48,26 @@
                 @include lib-css(flex-grow, 1);
                 @include lib-css(flex-direction, row);
                 display: flex;
-                height: 200px;
+                height: 400px;
             }
 
             .rv-dropdown-actions {
                 .dropdown-toggle:after {
                     display: none;
+                }
+                
+                .dropdown-menu {
+                    max-height: 300px;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    
+                    @media (max-height: 600px) {
+                        max-height: 200px;
+                    }
+                    
+                    @media (max-height: 400px) {
+                        max-height: 150px;
+                    }
                 }
             }
         }

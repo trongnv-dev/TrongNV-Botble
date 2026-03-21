@@ -108,7 +108,7 @@ class Backup
         return [];
     }
 
-    public function backupDb(string $key = null): bool
+    public function backupDb(?string $key = null): bool
     {
         if (! $key) {
             $key = Carbon::now()->format('Y-m-d-H-i-s');
@@ -184,7 +184,12 @@ class Backup
 
     protected function processMySqlDumpPHP(string $path, array $config): bool
     {
-        $dump = new MySqlDump('mysql:host=' . $config['host'] . ';dbname=' . $config['database'], $config['username'], $config['password']);
+        $dump = new MySqlDump(
+            'mysql:host=' . $config['host'] . ';dbname=' . $config['database'],
+            $config['username'],
+            $config['password'],
+            ['add-drop-table' => true]
+        );
 
         $dump->start($path . '.sql');
 
@@ -218,7 +223,7 @@ class Backup
         }
     }
 
-    public function backupFolder(string $source, string $key = null): bool
+    public function backupFolder(string $source, ?string $key = null): bool
     {
         if (! $key) {
             $key = Carbon::now()->format('Y-m-d-H-i-s');

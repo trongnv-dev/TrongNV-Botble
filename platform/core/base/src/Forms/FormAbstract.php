@@ -11,6 +11,7 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\FormRendering;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\Fields\AutocompleteField;
 use Botble\Base\Forms\Fields\ColorField;
 use Botble\Base\Forms\Fields\DatePickerField;
@@ -28,6 +29,7 @@ use Botble\Base\Forms\Fields\RepeaterField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TagField;
 use Botble\Base\Forms\Fields\TimeField;
+use Botble\Base\Forms\Fields\TimePickerField;
 use Botble\Base\Models\BaseModel as BaseModelInstance;
 use Botble\Base\Supports\Builders\Extensible;
 use Botble\Base\Supports\Builders\RenderingExtensible;
@@ -215,6 +217,7 @@ abstract class FormAbstract extends Form implements ExtensibleContract
             'customColor' => ColorField::class,
             'time' => TimeField::class,
             'datePicker' => DatePickerField::class,
+            'timePicker' => TimePickerField::class,
             'datetime' => DatetimeField::class,
             'autocomplete' => AutocompleteField::class,
             'html' => HtmlField::class,
@@ -503,8 +506,6 @@ abstract class FormAbstract extends Form implements ExtensibleContract
             $this->dispatchAfterSaving();
         }
 
-        $this->dispatchAfterSaving();
-
         $model = $this->getModel();
 
         if ($model instanceof Model && $model->exists && ! $withoutEvents) {
@@ -604,6 +605,17 @@ abstract class FormAbstract extends Form implements ExtensibleContract
         $this->setFormOption('class', $this->getFormOption('class') . ' ' . $class);
 
         return $this;
+    }
+
+    public function addHtml(Closure|string $html): static
+    {
+        return $this
+            ->add(
+                'html_' . Str::random(10),
+                HtmlField::class,
+                HtmlFieldOption::make()
+                    ->content($html)
+            );
     }
 
     public function disablePermalinkField(bool $disabled = true): static

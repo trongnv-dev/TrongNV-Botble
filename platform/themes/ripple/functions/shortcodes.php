@@ -2,7 +2,6 @@
 
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
-use Botble\Base\Forms\Fields\ColorField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextField;
@@ -49,13 +48,12 @@ app('events')->listen(RouteMatched::class, function (): void {
                     NumberField::class,
                     TextFieldOption::make()->label(__('Limit'))->defaultValue(5)
                 )
-                ->add('background_color', ColorField::class, [
-                    'label' => __('Background color'),
-                    'default_value' => '#ecf0f1',
-                ]);
+                ->withHtmlAttributes('#ecf0f1', '#666');
         });
 
         Shortcode::setPreviewImage('featured-posts', Theme::asset()->url('images/ui-blocks/featured-posts.png'));
+
+        Shortcode::registerLoadingState('featured-posts', Theme::getThemeNamespace('partials.shortcodes.featured-posts-skeleton'));
 
         Shortcode::register(
             'recent-posts',
@@ -85,18 +83,18 @@ app('events')->listen(RouteMatched::class, function (): void {
             return ShortcodeForm::createFromArray($attributes)
                 ->withLazyLoading()
                 ->add('title', TextField::class, TextFieldOption::make()->label(__('Title')))
-                ->add('background_color', ColorField::class, [
-                    'label' => __('Background color'),
-                    'default_value' => '#fff',
-                ])
                 ->add(
                     'with_sidebar',
                     SelectField::class,
                     SelectFieldOption::make()
                         ->label(__('With top sidebar?'))
                         ->choices(['yes' => __('Yes'), 'no' => __('No')])
-                );
+                        ->defaultValue('yes')
+                )
+                ->withHtmlAttributes('#fff', '#666');
         });
+
+        Shortcode::registerLoadingState('recent-posts', Theme::getThemeNamespace('partials.shortcodes.recent-posts-skeleton'));
 
         Shortcode::register(
             'featured-categories-posts',
@@ -107,8 +105,7 @@ app('events')->listen(RouteMatched::class, function (): void {
                     'slugable',
                     'posts' => function (BelongsToMany|BaseQueryBuilder $query): void {
                         $query
-                            ->wherePublished()
-                            ->orderByDesc('created_at');
+                            ->wherePublished()->latest();
                     },
                     'posts.slugable',
                 ];
@@ -193,12 +190,12 @@ app('events')->listen(RouteMatched::class, function (): void {
                     SelectFieldOption::make()
                         ->label(__('With primary sidebar?'))
                         ->choices(['yes' => __('Yes'), 'no' => __('No')])
+                        ->defaultValue('yes')
                 )
-                ->add('background_color', ColorField::class, [
-                    'label' => __('Background color'),
-                    'default_value' => '#ecf0f1',
-                ]);
+                ->withHtmlAttributes('#ecf0f1', '#666');
         });
+
+        Shortcode::registerLoadingState('featured-categories-posts', Theme::getThemeNamespace('partials.shortcodes.featured-categories-posts-skeleton'));
     }
 
     if (is_plugin_active('contact')) {
@@ -232,15 +229,15 @@ app('events')->listen(RouteMatched::class, function (): void {
         Shortcode::setAdminConfig('all-galleries', function (array $attributes) {
             return ShortcodeForm::createFromArray($attributes)
                 ->withLazyLoading()
+                ->add('title', TextField::class, TextFieldOption::make()->label(__('Title')))
                 ->add(
                     'limit',
                     NumberField::class,
                     TextFieldOption::make()->label(__('Limit'))->defaultValue(8)
                 )
-                ->add('background_color', ColorField::class, [
-                    'label' => __('Background color'),
-                    'default_value' => '#fff',
-                ]);
+                ->withHtmlAttributes('#fff', '#666');
         });
+
+        Shortcode::registerLoadingState('all-galleries', Theme::getThemeNamespace('partials.shortcodes.all-galleries-skeleton'));
     }
 });

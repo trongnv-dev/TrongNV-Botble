@@ -27,7 +27,7 @@
     }
 
     .text-end {
-        text-align: right !important;
+        text-align: end !important;
     }
 
     .text-decoration-underline {
@@ -77,7 +77,7 @@
     }
 }
 
-body[dir="rtl"] {
+body[dir='rtl'] {
     .auth-card form .auth-input-icon {
         left: auto;
         right: 1px;

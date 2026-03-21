@@ -26,10 +26,14 @@ class LoginController extends BaseController
         SeoHelper::setTitle(trans('plugins/member::member.login'));
 
         if (! session()->has('url.intended')) {
-            session(['url.intended' => url()->previous()]);
+            $previous = url()->previous();
+
+            if (parse_url($previous, PHP_URL_HOST) === request()->getHost()) {
+                session(['url.intended' => $previous]);
+            }
         }
 
-        Theme::breadcrumb()->add(__('Login'), route('public.member.login'));
+        Theme::breadcrumb()->add(trans('plugins/member::member.login'), route('public.member.login'));
 
         return Theme::scope(
             'member.auth.login',

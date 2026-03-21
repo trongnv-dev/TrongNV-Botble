@@ -34,7 +34,7 @@ class PublicController extends BaseController
             }
         }
 
-        SeoHelper::setTitle(theme_option('site_title'));
+        SeoHelper::setTitle(Theme::getSiteTitle());
 
         event(RenderingHomePageEvent::class);
 
@@ -72,7 +72,7 @@ class PublicController extends BaseController
         }
 
         if (isset($result['slug']) && $result['slug'] !== $key) {
-            $prefix = SlugHelper::getPrefix(get_class(Arr::first($result['data'])));
+            $prefix = SlugHelper::getPrefix(Arr::first($result['data'])::class);
 
             return redirect()->route('public.single', empty($prefix) ? $result['slug'] : "$prefix/{$result['slug']}");
         }
@@ -97,7 +97,7 @@ class PublicController extends BaseController
         return $this->getSiteMapIndex();
     }
 
-    public function getSiteMapIndex(string $key = null, string $extension = 'xml')
+    public function getSiteMapIndex(?string $key = null, string $extension = 'xml')
     {
         if ($key == 'sitemap') {
             $key = null;
